@@ -1,0 +1,118 @@
+{
+  "score": 0.9625,
+  "judge_score": 0.9625,
+  "components": {
+    "data_grounding": 1.0,
+    "causal_coherence": 1.0,
+    "reasoning_depth": 0.75,
+    "quality": 1.0
+  },
+  "weights": {
+    "data_grounding": 0.35,
+    "causal_coherence": 0.35,
+    "reasoning_depth": 0.15,
+    "quality": 0.15
+  },
+  "details": {
+    "data_grounding": {
+      "DG1": {
+        "pass": true,
+        "reasoning": "所有引用的用户数据（如睡眠时长、入睡时间、咖啡摄入时间等）与原始输入完全一致"
+      },
+      "DG2": {
+        "pass": true,
+        "reasoning": "所有基于数据的推断符合睡眠科学常识，如咖啡因影响、蓝光抑制褪黑素等"
+      },
+      "DG3": {
+        "pass": true,
+        "reasoning": "没有添加用户未提供的症状、习惯或背景信息"
+      },
+      "DG4": {
+        "pass": true,
+        "reasoning": "每个主要结论都明确引用了支持它的用户数据"
+      },
+      "summary": "该响应在数据引用、解读、避免编造和数据支撑方面均符合要求",
+      "layer_score": 1.0,
+      "passed_count": 4,
+      "total_count": 4
+    },
+    "causal_coherence": {
+      "CC1": {
+        "pass": true,
+        "reasoning": "Etiology clearly references Insights, such as sleep onset latency, total sleep time, and nap, and links them to root causes like caffeine, napping, and smartphone use."
+      },
+      "CC2": {
+        "pass": true,
+        "reasoning": "Each recommendation directly addresses a root cause identified in Etiology: eliminating naps, cutting caffeine, reducing smartphone use, and stimulus control."
+      },
+      "CC3": {
+        "pass": true,
+        "reasoning": "The reasoning chain is complete: data leads to insights, which are linked to root causes, and each recommendation is tied to a specific cause with clear causality."
+      },
+      "CC4": {
+        "pass": true,
+        "reasoning": "Each causal inference has clear steps, such as caffeine remaining active, naps reducing sleep pressure, and blue light suppressing melatonin, without logical jumps."
+      },
+      "CC5": {
+        "pass": true,
+        "reasoning": "All sections are logically consistent, with insights, etiology, and recommendations supporting each other without contradictions."
+      },
+      "summary": "The response demonstrates strong causal coherence with clear, consistent, and complete reasoning from data to recommendations.",
+      "layer_score": 1.0,
+      "passed_count": 5,
+      "total_count": 5
+    },
+    "reasoning_depth": {
+      "RD1": {
+        "pass": true,
+        "reasoning": "展示了明确的推理步骤，如分析咖啡因影响、午睡对睡眠压力的影响、手机使用对睡眠的干扰，并结合用户数据进行解释。"
+      },
+      "RD2": {
+        "pass": true,
+        "reasoning": "从生理（咖啡因、睡眠压力）、心理（午睡、睡眠驱动力）、环境（手机蓝光）等多个角度分析问题，并探讨了它们的相互作用。"
+      },
+      "RD3": {
+        "pass": false,
+        "reasoning": "没有明显的自我质疑或修正，推理过程较为线性，缺乏对不同可能性的权衡。"
+      },
+      "RD4": {
+        "pass": true,
+        "reasoning": "深入分析了根本原因，如咖啡因残留、睡眠压力减少、蓝光抑制褪黑素等，而非仅停留在表面现象。"
+      },
+      "summary": "推理过程清晰，多角度分析问题，但缺乏自我修正，深入探讨了根本原因。",
+      "layer_score": 0.75,
+      "passed_count": 3,
+      "total_count": 4
+    },
+    "quality": {
+      "OD1": {
+        "pass": true,
+        "reasoning": "建议明确针对用户的具体情况，如下午咖啡因摄入、使用手机、午睡等行为，且结合了用户的年龄和作息时间，具有高度个性化。"
+      },
+      "OD2": {
+        "pass": true,
+        "reasoning": "建议符合睡眠科学常识，如咖啡因影响睡眠、蓝光抑制褪黑素、午睡减少睡眠压力等，没有错误或误导性信息。"
+      },
+      "OD3": {
+        "pass": true,
+        "reasoning": "建议具体且可执行，如建议停止下午咖啡因摄入、提前1小时停止使用手机、调整午睡时间等，用户可立即采取行动。"
+      },
+      "OD4": {
+        "pass": true,
+        "reasoning": "建议覆盖了用户的主要问题（入睡困难、睡眠时间不足、咖啡因和手机使用）以及次要问题（午睡影响睡眠压力），提供了多角度的建议。"
+      },
+      "OD5": {
+        "pass": true,
+        "reasoning": "表达清晰、逻辑清楚，结构合理，分为洞察、病因和建议三部分，易于理解。"
+      },
+      "OD6": {
+        "pass": true,
+        "reasoning": "建议安全且适当，针对用户年龄和健康状况（办公室工作、睡眠不足）提供了合理的调整方案，无潜在风险。"
+      },
+      "summary": "建议高度相关、准确、具体、全面、清晰且安全，符合用户需求。",
+      "layer_score": 1.0,
+      "passed_count": 6,
+      "total_count": 6
+    }
+  }
+}

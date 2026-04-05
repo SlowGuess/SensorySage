@@ -148,63 +148,64 @@ Provide ONLY the JSON output, no additional text.
     return prompt
 
 
-def evaluate_case(client: OpenAI, case_id: str, predictions: dict, user_data: str, model: str, debug: bool = False) -> dict:
-    """Evaluate a single case study with ONE API call."""
+def evaluate_case(client: OpenAI, case_id: str, predictions: dict, user_data: str, model: str, debug: bool = False, max_retries: int = 5) -> dict:
+    """Evaluate a single case study with ONE API call, including robust retries."""
+    import time
 
     prompt = create_full_evaluation_prompt(case_id, predictions, user_data)
+    
+    for attempt in range(max_retries):
+        try:
+            # Prepare API call parameters
+            api_params = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": "You are an expert evaluator providing structured JSON responses with numerical scores."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.0
+            }
 
-    try:
-        # Prepare API call parameters
-        api_params = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": "You are an expert evaluator providing structured JSON responses with numerical scores."},
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.0
-        }
+            if not model.startswith("claude"):
+                api_params["response_format"] = {"type": "json_object"}
 
-        # Only add response_format for OpenAI models (not Claude)
-        if not model.startswith("claude"):
-            api_params["response_format"] = {"type": "json_object"}
+            response = client.chat.completions.create(**api_params)
+            raw_content = response.choices[0].message.content
 
-        response = client.chat.completions.create(**api_params)
+            if debug:
+                print(f"\n=== DEBUG: Raw API Response ===")
+                print(raw_content)
+                print("=" * 40)
 
-        raw_content = response.choices[0].message.content
+            import re
+            cleaned_content = raw_content.strip()
+            cleaned_content = re.sub(r'^```json\s*', '', cleaned_content)
+            cleaned_content = re.sub(r'^```\s*', '', cleaned_content)
+            cleaned_content = re.sub(r'\s*```$', '', cleaned_content)
 
-        if debug:
-            print(f"\n=== DEBUG: Raw API Response ===")
-            print(raw_content)
-            print("=" * 40)
+            scores = json.loads(cleaned_content)
+            scores['aggregate'] = calculate_aggregate_scores(scores)
+            return scores
 
-        # Clean markdown code blocks if present (Claude often returns ```json ... ```)
-        import re
-        cleaned_content = raw_content.strip()
-        cleaned_content = re.sub(r'^```json\s*', '', cleaned_content)
-        cleaned_content = re.sub(r'^```\s*', '', cleaned_content)
-        cleaned_content = re.sub(r'\s*```$', '', cleaned_content)
-
-        scores = json.loads(cleaned_content)
-
-        # Calculate aggregate scores
-        aggregate = calculate_aggregate_scores(scores)
-        scores['aggregate'] = aggregate
-
-        return scores
-
-    except Exception as e:
-        print(f"Error evaluating {case_id}: {e}")
-        # Return default scores
-        default_scores = {}
-        for section in ["insights", "etiology", "recommendations"]:
-            for q in range(1, 13):
-                default_scores[f"{section}_Q{q}"] = 3
-        default_scores["Overall_Q1"] = 3
-        default_scores["Overall_Q2"] = 3
-        default_scores["Overall_Q3"] = 3
-        default_scores["overall_comment"] = f"Evaluation failed: {str(e)}"
-        default_scores["aggregate"] = calculate_aggregate_scores(default_scores)
-        return default_scores
+        except Exception as e:
+            print(f"\n⚠️ [Attempt {attempt + 1}/{max_retries}] Error evaluating {case_id}: {e}")
+            if attempt < max_retries - 1:
+                # 递增退避策略：失败后分别等待 5秒, 10秒, 15秒...
+                wait_time = (attempt + 1) * 5
+                print(f"Waiting {wait_time} seconds before retrying...")
+                time.sleep(wait_time)
+            else:
+                print(f"❌ Failed {case_id} after {max_retries} attempts. Applying fallback scores.")
+                default_scores = {}
+                for section in ["insights", "etiology", "recommendations"]:
+                    for q in range(1, 13):
+                        default_scores[f"{section}_Q{q}"] = 3
+                default_scores["Overall_Q1"] = 3
+                default_scores["Overall_Q2"] = 3
+                default_scores["Overall_Q3"] = 3
+                default_scores["overall_comment"] = f"Evaluation failed after retries: {str(e)}"
+                default_scores["aggregate"] = calculate_aggregate_scores(default_scores)
+                return default_scores
 
 
 def calculate_aggregate_scores(scores: dict) -> dict:
@@ -300,7 +301,7 @@ def main():
         print(f"  Insights: {agg.get('insights_avg', 0):.2f}, Etiology: {agg.get('etiology_avg', 0):.2f}, Recommendations: {agg.get('recommendations_avg', 0):.2f}")
         print(f"  Overall Quality (Q3): {eval_result.get('Overall_Q3', 'N/A')}")
 
-        time.sleep(1)  # Rate limiting
+        time.sleep(5)  # Rate limiting
 
     # Calculate dataset statistics
     dataset_stats = calculate_dataset_statistics(results)

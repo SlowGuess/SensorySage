@@ -129,3 +129,4 @@ outputs
 
 # 彻底忽略verl下的models目录（核心！）
 verl/models/Llama-3-8B-Instruct
+verl/models/Qwen3-8B
